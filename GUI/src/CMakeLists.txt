@@ -27,11 +27,9 @@ find_package(OpenNI2 REQUIRED)
 find_package(efusion REQUIRED)
 find_package(SuiteSparse REQUIRED)
 
-if(WIN32)
-  find_package(RealSense QUIET)
-  CANONIFY_BOOL(REALSENSE_FOUND)
-  message(STATUS "librealsense found: ${REALSENSE_FOUND}")
-  option(WITH_REALSENSE "Build with Intel RealSense support?" ${REALSENSE_FOUND})
+if(WITH_REALSENSE)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(REALSENSE2 realsense2 REQUIRED)
 endif()
 
 if(WIN32)
@@ -46,9 +44,9 @@ include_directories(${EFUSION_INCLUDE_DIR})
 include_directories(${OPENNI2_INCLUDE_DIR})
 
 if(WITH_REALSENSE)
-  include_directories(${REALSENSE_INCLUDE_DIR})
+  include_directories(${REALSENSE2_INCLUDE_DIRS})
   add_definitions(-DWITH_REALSENSE)
-  set(EXTRA_LIBS ${EXTRA_LIBS} ${REALSENSE_LIBRARY})
+  set(EXTRA_LIBS ${EXTRA_LIBS} ${REALSENSE2_LIBRARIES})
 endif()
 
 file(GLOB srcs *.cpp)
@@ -80,7 +78,7 @@ add_executable(ElasticFusion
 )
 
 target_link_libraries(ElasticFusion
-					  ${EXTRA_WINDOWS_LIBS}
+                      ${EXTRA_WINDOWS_LIBS}
                       ${ZLIB_LIBRARY}
                       ${Pangolin_LIBRARIES}
                       ${CUDA_LIBRARIES}
